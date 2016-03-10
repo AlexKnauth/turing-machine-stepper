@@ -3,6 +3,8 @@
 (require 2htdp/image
          2htdp/universe
          my-object
+         racket/list
+         racket/math
          racket/pretty
          "tm.rkt"
          "tm+table.rkt"
@@ -22,14 +24,19 @@
 (define TURING-MACHINE-TABLE-X 20)
 (define TURING-MACHINE-TABLE-Y 90)
 
-(define TABLE-CELL-WIDTH  70)
-(define TABLE-CELL-HEIGHT 20)
+(define TABLE-CELL-WIDTH  100)
+(define TABLE-CELL-HEIGHT 40)
+
+(define TURING-MACHINE-TABLE-MAX-ROWS
+  (exact-floor
+   (/ (- SCENE-HEIGHT TURING-MACHINE-TABLE-Y)
+      TABLE-CELL-HEIGHT)))
 
 (define TAPE-SQUARE-WIDTH  50)
 (define TAPE-SQUARE-HEIGHT 50)
 
 (define TAPE-FONT-SIZE 20)
-(define TABLE-FONT-SIZE 10)
+(define TABLE-FONT-SIZE 16)
 
 (define TAPE-SQUARE-OUTLINE-COLOR "black")
 (define TAPE-FONT-COLOR "blue")
@@ -133,6 +140,18 @@
 (define (render-turing-machine-table w)
   (define rows (send w table-rows))
   (define selected-row (send w which-table-row))
+  (render-turing-machine-table-sections rows selected-row))
+
+(define (render-turing-machine-table-sections rows selected-row)
+  (cond
+    [(<= (length rows) TURING-MACHINE-TABLE-MAX-ROWS)
+     (render-turing-machine-table-section rows selected-row)]
+    [else
+     (beside
+      (render-turing-machine-table-section (take rows TURING-MACHINE-TABLE-MAX-ROWS) selected-row)
+      (render-turing-machine-table-section (drop rows TURING-MACHINE-TABLE-MAX-ROWS) selected-row))]))
+
+(define (render-turing-machine-table-section rows selected-row)
   (frame
    ;; for each row
    (for/fold ([img empty-image])
