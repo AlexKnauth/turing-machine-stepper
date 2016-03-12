@@ -1,8 +1,6 @@
 #lang racket/base
 
 (provide turing-machine+table
-         table-rows
-         which-table-row
          )
 
 (require racket/generic
@@ -12,16 +10,11 @@
          syntax/parse/define
          "tm.rkt"
          "tm-configuration.rkt"
+         "tm-table.rkt"
          "delegate.rkt"
          (for-syntax racket/base
                      syntax/parse
                      ))
-
-(define-generics tm-configuration-table
-  ;; table-rows : TM-Configuration-Table -> (Listof (List Symbol Any Symbol Any))
-  (table-rows tm-configuration-table)
-  ;; which-table-row : TM-Configuration-Table TM-Configuration -> (List Symbol Any Symbol Any)
-  (which-table-row tm-configuration-table tm-configuration))
 
 (struct turing-machine-configunation+table
   (tm-configuration rows which-row)
@@ -35,9 +28,9 @@
    (define (next this)
      (match-define (turing-machine-configunation+table tm-configuration rows which-row) this)
      (turing-machine-configunation+table (gen-next tm-configuration) rows which-row))]
-  #:methods gen:tm-configuration-table
-  [(define (table-rows tm-configuration+table)
-     (turing-machine-configunation+table-rows tm-configuration+table))
+  #:methods gen:tm-table
+  [(define (table-rows table)
+     (turing-machine-configunation+table-rows table))
    (define (which-table-row table tm-configuration)
      (define which-row (turing-machine-configunation+table-which-row table))
      (define tape (get-tape-list tm-configuration))

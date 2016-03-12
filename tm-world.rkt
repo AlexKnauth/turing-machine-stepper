@@ -8,6 +8,7 @@
          racket/pretty
          "tm-configuration.rkt"
          "tm.rkt"
+         "tm-table.rkt"
          "tm+table.rkt"
          "tape-immutable.rkt"
          )
