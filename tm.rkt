@@ -4,23 +4,15 @@
          → ->
          ← <-
          write!
-         gen:tm-configuration
-         halted?
-         next
-         get-tape
-         get-position
-         get-current-state-name
          )
 
-(require my-object
-         racket/function
+(require racket/function
          racket/generic
-         racket/local
          racket/match
          racket/set
-         racket/stxparam
          syntax/parse/define
          "tape-immutable.rkt"
+         "tm-configuration.rkt"
          (for-syntax racket/base
                      syntax/parse
                      ))
@@ -34,13 +26,6 @@
 
 (define-syntax -> (make-rename-transformer #'→))
 (define-syntax <- (make-rename-transformer #'←))
-
-(define-generics tm-configuration
-  (halted? tm-configuration)
-  (next tm-configuration)
-  (get-tape tm-configuration)
-  (get-position tm-configuration)
-  (get-current-state-name tm-configuration))
 
 (struct turing-machine-configuration (tape state halt-states)
   #:methods gen:tm-configuration

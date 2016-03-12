@@ -12,7 +12,6 @@
          )
 
 (require racket/list
-         racket/local
          racket/match
          "tape-blank.rkt"
          (only-in srfi/1 append-reverse)

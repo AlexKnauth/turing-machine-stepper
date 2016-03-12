@@ -6,6 +6,7 @@
          racket/list
          racket/math
          racket/pretty
+         "tm-configuration.rkt"
          "tm.rkt"
          "tm+table.rkt"
          "tape-immutable.rkt"

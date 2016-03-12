@@ -5,15 +5,13 @@
          which-table-row
          )
 
-(require my-object
-         racket/generic
+(require racket/generic
          racket/list
          racket/local
          racket/match
          syntax/parse/define
-         unstable/sequence
          "tm.rkt"
-         "tape-immutable.rkt"
+         "tm-configuration.rkt"
          (for-syntax racket/base
                      syntax/parse
                      ))
