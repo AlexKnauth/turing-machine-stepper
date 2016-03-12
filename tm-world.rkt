@@ -10,6 +10,7 @@
          "tm.rkt"
          "tm-table.rkt"
          "tm+table.rkt"
+         "tm+table+history.rkt"
          "tape-immutable.rkt"
          )
 
@@ -81,11 +82,12 @@
 (define HALTED-IMAGE
   (text "HALTED" HALTED-FONT-SIZE HALTED-FONT-COLOR))
 
-;; A World is a Turing-Machine-Configunation+Table
+;; A World is a TM-Configuration+Table+History
 
 ;; main : Turing-Machine+Table (Listof Any) -> World
 (define (main tm input)
-  (big-bang (tm input)
+  (big-bang (tm-configuration+table-start-history
+             (tm input))
             [on-tick tick]
             [to-draw render-world]
             [stop-when world-halted?]
