@@ -133,7 +133,7 @@
 ;; render-turing-machine-table : World -> Image
 (define (render-turing-machine-table w)
   (define rows (table-rows w))
-  (define selected-row (which-table-row w))
+  (define selected-row (which-table-row w w))
   (render-turing-machine-table-sections rows selected-row))
 
 (define (render-turing-machine-table-sections rows selected-row)
