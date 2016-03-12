@@ -9,7 +9,7 @@
          syntax/parse/define
          unstable/sequence
          "tm.rkt"
-         "tape.rkt"
+         "tape-mutable.rkt"
          (for-syntax racket/base
                      syntax/parse
                      ))

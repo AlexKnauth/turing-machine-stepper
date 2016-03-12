@@ -12,7 +12,7 @@
          racket/set
          racket/stxparam
          syntax/parse/define
-         "tape.rkt"
+         "tape-mutable.rkt"
          (for-syntax racket/base
                      syntax/parse
                      ))

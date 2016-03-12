@@ -8,7 +8,7 @@
          racket/pretty
          "tm.rkt"
          "tm+table.rkt"
-         "tape.rkt"
+         "tape-mutable.rkt"
          )
 
 (define SCENE-WIDTH  1200)
