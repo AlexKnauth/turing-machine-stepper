@@ -21,8 +21,11 @@
   (tm-configuration rows which-row)
   #:methods gen:tm-configuration
   [(delegate turing-machine-configunation+table-tm-configuration
-             [halted? get-tape get-position get-current-state-name])
+             [halted? get-tape-list get-tape-position get-current-state-name])
    (define/generic gen-next next)
+   ;; The next method for this struct returns not only a TM-Configuration,
+   ;; but also a turing-machine-configuration+table struct instance.
+   ;; That's why the simple delegate form doesn't work for this.
    (define (next this)
      (match-define (turing-machine-configunation+table tm-configuration rows which-row) this)
      (turing-machine-configunation+table (gen-next tm-configuration) rows which-row))])
@@ -32,8 +35,8 @@
 
 (define (which-table-row tm-configuration+table)
   (define which-row (turing-machine-configunation+table-which-row tm-configuration+table))
-  (define tape (get-tape tm-configuration+table))
-  (define pos (get-position tm-configuration+table))
+  (define tape (get-tape-list tm-configuration+table))
+  (define pos (get-tape-position tm-configuration+table))
   (define char
     (if (< pos (length tape))
         (list-ref tape pos)

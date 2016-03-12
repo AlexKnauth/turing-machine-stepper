@@ -38,9 +38,9 @@
         (state (tape-read tape)))
      (define next-tape (tape-action tape))
      (turing-machine-configuration next-tape next-state halt-states))
-   (define (get-tape this)
+   (define (get-tape-list this)
      (tape->list (turing-machine-configuration-tape this)))
-   (define (get-position this)
+   (define (get-tape-position this)
      (tape-position (turing-machine-configuration-tape this)))
    (define (get-current-state-name this)
      (object-name (turing-machine-configuration-state this)))])
@@ -79,10 +79,10 @@
   (define (loop obj)
     (cond
       [(halted? obj)
-       (printf "halted with:\n~v\n" (get-tape obj))
+       (printf "halted with:\n~v\n" (get-tape-list obj))
        (get-current-state-name obj)]
       [else
-       (printf "~v\n" (get-tape obj))
+       (printf "~v\n" (get-tape-list obj))
        (loop (next obj))]))
   (loop obj))
 

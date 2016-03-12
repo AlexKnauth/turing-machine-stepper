@@ -123,10 +123,10 @@
 
 ;; render-tape : World -> Image
 (define (render-tape w)
-  (define pos (get-position w))
+  (define pos (get-tape-position w))
   (frame
    (for/fold ([img empty-image])
-             ([v (in-list (get-tape w))]
+             ([v (in-list (get-tape-list w))]
               [i (in-naturals)])
      (beside img (render-tape-square v (= i pos))))))
 
