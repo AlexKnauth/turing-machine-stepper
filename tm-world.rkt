@@ -90,18 +90,13 @@
              (tm input))
             [on-tick tick]
             [to-draw render-world]
-            [stop-when world-halted?]
             [on-key handle-key]
             ))
-
-;; world-halted? : World -> Boolean
-(define (world-halted? w)
-  (halted? w))
 
 ;; render-world : World -> Image
 (define (render-world w)
   (define img (render-world/not-halted w))
-  (cond [(world-halted? w)
+  (cond [(halted? w)
          (overlay HALTED-IMAGE img)]
         [else
          img]))
@@ -186,7 +181,8 @@
 ;; handle-key : World KeyEvent -> World
 (define (handle-key w k)
   (cond [(key=? k "right")
-         (next w)]
+         (cond [(halted? w) w]
+               [else (next w)])]
         [(key=? k "left")
          (tm-configuration+table+history-previous-configuration w)]
         [else
