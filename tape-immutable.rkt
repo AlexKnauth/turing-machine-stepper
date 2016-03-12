@@ -4,9 +4,9 @@
          tape->list
          tape-position
          tape-read
-         tape-write!
-         tape-left!
-         tape-right!
+         tape-write
+         tape-move-left
+         tape-move-right
          blank
          blank?
          )
@@ -19,7 +19,7 @@
          )
 
 ;; Tape is (tape (Listof Any) (Listof Any))
-(struct tape (left right) #:mutable)
+(struct tape (left right))
 
 ;; tape->list : Tape -> (Listof Any)
 (define (tape->list tape)
@@ -39,22 +39,21 @@
 (define (tape-read tape)
   (first/blank (tape-right tape)))
 
-;; tape-write! : Tape Any -> Void
-(define (tape-write! tape v)
-  (set-tape-right! tape
-                   (cons v (maybe-rest (tape-right tape)))))
+;; tape-write : Tape Any -> Tape
+(define (tape-write t v)
+  (struct-copy tape t
+               [right (cons v (maybe-rest (tape-right t)))]))
 
-;; tape-left! : Tape -> Void
+;; tape-move-left : Tape -> Tape
 ;; Uses cons/no-blank
-(define (tape-left! t)
+(define (tape-move-left t)
   (match-define (tape left right) t)
-  (set-tape-right! t (cons/no-blank (first left) right))
-  (set-tape-left!  t (rest left)))
+  (tape (rest left)
+        (cons/no-blank (first left) right)))
 
-;; tape-right! : Tape -> Void
+;; tape-move-right : Tape -> Tape
 ;; Uses first/blank and maybe-rest
-(define (tape-right! t)
+(define (tape-move-right t)
   (match-define (tape left right) t)
-  (set-tape-left!  t (cons (first/blank right) left))
-  (set-tape-right! t (maybe-rest right)))
-
+  (tape (cons (first/blank right) left)
+        (maybe-rest right)))
