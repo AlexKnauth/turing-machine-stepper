@@ -21,7 +21,9 @@
 ;; TM-Configuration+Table+History -> TM-Configuration+Table+History
 (define (tm-configuration+table+history-previous-configuration tm)
   (match-define (tm-configuration+table+history configurations table) tm)
-  (tm-configuration+table+history (rest configurations) table))
+  (cond
+    [(empty? (rest configurations)) tm]
+    [else (tm-configuration+table+history (rest configurations) table)]))
 
 (define (tm-configuration+table+history-current-configuration tm)
   (first (tm-configuration+table+history-configurations tm)))
