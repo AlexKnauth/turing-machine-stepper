@@ -11,8 +11,8 @@
          racket/match
          racket/set
          syntax/parse/define
-         "tape-immutable.rkt"
-         "tm-configuration.rkt"
+         "tape/tape-immutable.rkt"
+         "configuration/tm-configuration.rkt"
          (for-syntax racket/base
                      syntax/parse
                      ))

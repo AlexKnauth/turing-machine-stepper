@@ -8,7 +8,7 @@
          racket/local
          racket/match
          syntax/parse/define
-         "tm.rkt"
+         "../tm.rkt"
          "tm-configuration.rkt"
          "tm-table.rkt"
          "delegate.rkt"

@@ -6,12 +6,12 @@
          racket/list
          racket/math
          racket/pretty
-         "tm-configuration.rkt"
+         "configuration/tm-configuration.rkt"
          "tm.rkt"
-         "tm-table.rkt"
-         "tm+table.rkt"
-         "tm+table+history.rkt"
-         "tape-immutable.rkt"
+         "configuration/tm-table.rkt"
+         "configuration/tm+table.rkt"
+         "configuration/tm+table+history.rkt"
+         "tape/tape-immutable.rkt"
          )
 
 (define SCENE-WIDTH  1200)
