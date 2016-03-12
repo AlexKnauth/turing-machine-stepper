@@ -187,6 +187,8 @@
 (define (handle-key w k)
   (cond [(key=? k "right")
          (next w)]
+        [(key=? k "left")
+         (tm-configuration+table+history-previous-configuration w)]
         [else
          w]))
 

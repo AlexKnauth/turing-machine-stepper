@@ -1,7 +1,8 @@
 #lang racket/base
 
-(provide tm-configuration+table-start-history)
-         
+(provide tm-configuration+table-start-history
+         tm-configuration+table+history-previous-configuration
+         )
 
 (require racket/generic
          racket/list
@@ -15,6 +16,12 @@
 ;; (And TM-Configuration TM-Table) -> TM-Configuration+Table+History
 (define (tm-configuration+table-start-history configuration+table)
   (tm-configuration+table+history (list configuration+table) configuration+table))
+
+;; tm-configuration+table+history-previous-configuration :
+;; TM-Configuration+Table+History -> TM-Configuration+Table+History
+(define (tm-configuration+table+history-previous-configuration tm)
+  (match-define (tm-configuration+table+history configurations table) tm)
+  (tm-configuration+table+history (rest configurations) table))
 
 (define (tm-configuration+table+history-current-configuration tm)
   (first (tm-configuration+table+history-configurations tm)))
