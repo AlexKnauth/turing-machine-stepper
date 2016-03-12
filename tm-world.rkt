@@ -79,14 +79,7 @@
 (define HALTED-IMAGE
   (text "HALTED" HALTED-FONT-SIZE HALTED-FONT-COLOR))
 
-;; World is
-;; (Object [halted? (-> Boolean)]
-;;         [next (-> World)]
-;;         [get-tape (-> (Listof Any))]
-;;         [get-position (-> Natural)]
-;;         [get-current-state-name (-> Symbol)]
-;;         [table-rows (-> (Listof (Listof Any)))]
-;;         [which-table-row (-> (Listof Any))])
+;; A World is a Turing-Machine-Configunation+Table
 
 ;; main : Turing-Machine+Table (Listof Any) -> World
 (define (main tm input)
@@ -99,7 +92,7 @@
 
 ;; world-halted? : World -> Boolean
 (define (world-halted? w)
-  (send w halted?))
+  (halted? w))
 
 ;; render-world : World -> Image
 (define (render-world w)
@@ -129,17 +122,17 @@
 
 ;; render-tape : World -> Image
 (define (render-tape w)
-  (define pos (send w get-position))
+  (define pos (get-position w))
   (frame
    (for/fold ([img empty-image])
-             ([v (in-list (send w get-tape))]
+             ([v (in-list (get-tape w))]
               [i (in-naturals)])
      (beside img (render-tape-square v (= i pos))))))
 
 ;; render-turing-machine-table : World -> Image
 (define (render-turing-machine-table w)
-  (define rows (send w table-rows))
-  (define selected-row (send w which-table-row))
+  (define rows (table-rows w))
+  (define selected-row (which-table-row w))
   (render-turing-machine-table-sections rows selected-row))
 
 (define (render-turing-machine-table-sections rows selected-row)
@@ -189,7 +182,7 @@
 ;; handle-key : World KeyEvent -> World
 (define (handle-key w k)
   (cond [(key=? k "right")
-         (send w next)]
+         (next w)]
         [else
          w]))
 

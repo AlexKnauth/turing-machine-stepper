@@ -4,10 +4,17 @@
          → ->
          ← <-
          write!
+         gen:tm-configuration
+         halted?
+         next
+         get-tape
+         get-position
+         get-current-state-name
          )
 
 (require my-object
          racket/function
+         racket/generic
          racket/local
          racket/match
          racket/set
@@ -27,6 +34,31 @@
 
 (define-syntax -> (make-rename-transformer #'→))
 (define-syntax <- (make-rename-transformer #'←))
+
+(define-generics tm-configuration
+  (halted? tm-configuration)
+  (next tm-configuration)
+  (get-tape tm-configuration)
+  (get-position tm-configuration)
+  (get-current-state-name tm-configuration))
+
+(struct turing-machine-configuration (tape state halt-states)
+  #:methods gen:tm-configuration
+  [(define (halted? this)
+     (match-define (turing-machine-configuration _ state halt-states) this)
+     (set-member? halt-states state))
+   (define (next this)
+     (match-define (turing-machine-configuration tape state halt-states) this)
+     (define-values [tape-action next-state]
+        (state (tape-read tape)))
+     (define next-tape (tape-action tape))
+     (turing-machine-configuration next-tape next-state halt-states))
+   (define (get-tape this)
+     (tape->list (turing-machine-configuration-tape this)))
+   (define (get-position this)
+     (tape-position (turing-machine-configuration-tape this)))
+   (define (get-current-state-name this)
+     (object-name (turing-machine-configuration-state this)))])
 
 (define-syntax-parser turing-machine
   [(tm #:start-state start-state:id
@@ -49,45 +81,24 @@
           halt-state))
        ...
        (define halting-states (seteq halt-state ...))
-       (object
-        [tape
-         (make-start-tape input-list)]
-        [current-state
-         start-state]
-        [halted?
-         (λ ()
-           (set-member? halting-states current-state))]
-        [next
-         (λ ()
-           (define-values [tape-action next-current-state]
-             (current-state (tape-read tape)))
-           (define next-tape (tape-action tape))
-           (object-extend this
-                          [tape next-tape]
-                          [current-state next-current-state]))]
-        [get-tape
-         (λ ()
-           (tape->list tape))]
-        [get-position
-         (λ ()
-           (tape-position tape))]
-        [get-current-state-name
-         (λ ()
-           (object-name current-state))]
-        ))])
+       (turing-machine-configuration
+        (make-start-tape input-list)
+        start-state
+        halting-states))])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (run machine input)
-  (define obj (machine input))
+  (define obj
+    (machine input))
   (define (loop obj)
     (cond
-      [(send obj halted?)
-       (printf "halted with:\n~v\n" (send obj get-tape))
-       (send obj get-current-state-name)]
+      [(halted? obj)
+       (printf "halted with:\n~v\n" (get-tape obj))
+       (get-current-state-name obj)]
       [else
-       (printf "~v\n" (send obj get-tape))
-       (loop (send obj next))]))
+       (printf "~v\n" (get-tape obj))
+       (loop (next obj))]))
   (loop obj))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

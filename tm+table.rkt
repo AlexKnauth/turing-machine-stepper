@@ -1,8 +1,12 @@
 #lang racket/base
 
-(provide turing-machine+table)
+(provide turing-machine+table
+         table-rows
+         which-table-row
+         )
 
 (require my-object
+         racket/generic
          racket/list
          racket/local
          racket/match
@@ -13,6 +17,39 @@
          (for-syntax racket/base
                      syntax/parse
                      ))
+
+(struct turing-machine-configunation+table
+  (tm-configuration rows which-row)
+  #:methods gen:tm-configuration
+  [(define/generic gen-halted? halted?)
+   (define/generic gen-next next)
+   (define/generic gen-get-tape get-tape)
+   (define/generic gen-get-position get-position)
+   (define/generic gen-get-current-state-name get-current-state-name)
+   (define (halted? this)
+     (gen-halted? (turing-machine-configunation+table-tm-configuration this)))
+   (define (next this)
+     (match-define (turing-machine-configunation+table tm-configuration rows which-row) this)
+     (turing-machine-configunation+table (gen-next tm-configuration) rows which-row))
+   (define (get-tape this)
+     (gen-get-tape (turing-machine-configunation+table-tm-configuration this)))
+   (define (get-position this)
+     (gen-get-position (turing-machine-configunation+table-tm-configuration this)))
+   (define (get-current-state-name this)
+     (gen-get-current-state-name (turing-machine-configunation+table-tm-configuration this)))])
+
+(define (table-rows tm-configuration+table)
+  (turing-machine-configunation+table-rows tm-configuration+table))
+
+(define (which-table-row tm-configuration+table)
+  (define which-row (turing-machine-configunation+table-which-row tm-configuration+table))
+  (define tape (get-tape tm-configuration+table))
+  (define pos (get-position tm-configuration+table))
+  (define char
+    (if (< pos (length tape))
+        (list-ref tape pos)
+        (error "this should never happen")))
+  (which-row (get-current-state-name tm-configuration+table) char))
 
 (define-syntax-parser turing-machine+table
   [(tm+table #:start-state start-state:id
@@ -46,15 +83,8 @@
                                        ...)]
                                ...))]
        (lambda (input-list)
-         (object-extend (tm input-list)
-                        #:inherit (get-tape get-position get-current-state-name)
-                        [table-rows (lambda () rows)]
-                        [which-table-row (lambda ()
-                                           (define tape (get-tape))
-                                           (define pos (get-position))
-                                           (define char
-                                             (if (< pos (length tape))
-                                                 (list-ref tape pos)
-                                                 (error "this should never happen")))
-                                           (which-row (get-current-state-name) char))])))])
+         (turing-machine-configunation+table
+          (tm input-list)
+          rows
+          which-row)))])
 
