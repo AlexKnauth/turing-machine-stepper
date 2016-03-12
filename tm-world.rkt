@@ -8,7 +8,7 @@
          racket/pretty
          "tm.rkt"
          "tm+table.rkt"
-         "tape-mutable.rkt"
+         "tape-immutable.rkt"
          )
 
 (define SCENE-WIDTH  1200)
@@ -81,7 +81,7 @@
 
 ;; World is
 ;; (Object [halted? (-> Boolean)]
-;;         [next! (-> Void)]
+;;         [next (-> World)]
 ;;         [get-tape (-> (Listof Any))]
 ;;         [get-position (-> Natural)]
 ;;         [get-current-state-name (-> Symbol)]
@@ -189,8 +189,7 @@
 ;; handle-key : World KeyEvent -> World
 (define (handle-key w k)
   (cond [(key=? k "right")
-         (send w next!)
-         w]
+         (send w next)]
         [else
          w]))
 

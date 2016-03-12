@@ -7,21 +7,23 @@
          )
 
 (require my-object
+         racket/function
          racket/local
          racket/match
          racket/set
          racket/stxparam
          syntax/parse/define
-         "tape-mutable.rkt"
+         "tape-immutable.rkt"
          (for-syntax racket/base
                      syntax/parse
                      ))
 (module+ test
   (require rackunit))
 
-(define-syntax-parameter → #f)
-(define-syntax-parameter ← #f)
-(define-syntax-parameter write! #f)
+(define → tape-move-right)
+(define ← tape-move-left)
+(define ((write! char) tape)
+  (tape-write tape char))
 
 (define-syntax -> (make-rename-transformer #'→))
 (define-syntax <- (make-rename-transformer #'←))
@@ -33,37 +35,36 @@
                   ...)]
        ...)
    #'(lambda (input-list)
-       (define tape
-         (make-start-tape input-list))
-       (define write-char!
-         (local [(define (write! char)
-                   (tape-write! tape char))]
-           write!))
        (define (state char)
-         (syntax-parameterize
-             ([→ (λ (stx) #'(tape-right! tape))]
-              [← (λ (stx) #'(tape-left! tape))]
-              [write! (make-rename-transformer #'write-char!)])
-           (match char
-             [char-pat
-              action
-              next-state]
-             ...)))
+         (match char
+           [char-pat
+            (values
+             action
+             next-state)]
+           ...))
        ...
-       (define (halt-state char) halt-state)
+       (define (halt-state char)
+         (values
+          identity
+          halt-state))
        ...
-       ; a mutable variable!
-       (define current-state start-state)
        (define halting-states (seteq halt-state ...))
        (object
+        [tape
+         (make-start-tape input-list)]
+        [current-state
+         start-state]
         [halted?
          (λ ()
            (set-member? halting-states current-state))]
-        [next!
+        [next
          (λ ()
-           (set! current-state
-                 (current-state
-                  (tape-read tape))))]
+           (define-values [tape-action next-current-state]
+             (current-state (tape-read tape)))
+           (define next-tape (tape-action tape))
+           (object-extend this
+                          [tape next-tape]
+                          [current-state next-current-state]))]
         [get-tape
          (λ ()
            (tape->list tape))]
@@ -79,16 +80,15 @@
 
 (define (run machine input)
   (define obj (machine input))
-  (define (loop)
+  (define (loop obj)
     (cond
       [(send obj halted?)
        (printf "halted with:\n~v\n" (send obj get-tape))
        (send obj get-current-state-name)]
       [else
        (printf "~v\n" (send obj get-tape))
-       (send obj next!)
-       (loop)]))
-  (loop))
+       (loop (send obj next))]))
+  (loop obj))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
