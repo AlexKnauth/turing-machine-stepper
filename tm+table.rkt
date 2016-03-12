@@ -12,6 +12,7 @@
          syntax/parse/define
          "tm.rkt"
          "tm-configuration.rkt"
+         "delegate.rkt"
          (for-syntax racket/base
                      syntax/parse
                      ))
@@ -19,22 +20,12 @@
 (struct turing-machine-configunation+table
   (tm-configuration rows which-row)
   #:methods gen:tm-configuration
-  [(define/generic gen-halted? halted?)
+  [(delegate turing-machine-configunation+table-tm-configuration
+             [halted? get-tape get-position get-current-state-name])
    (define/generic gen-next next)
-   (define/generic gen-get-tape get-tape)
-   (define/generic gen-get-position get-position)
-   (define/generic gen-get-current-state-name get-current-state-name)
-   (define (halted? this)
-     (gen-halted? (turing-machine-configunation+table-tm-configuration this)))
    (define (next this)
      (match-define (turing-machine-configunation+table tm-configuration rows which-row) this)
-     (turing-machine-configunation+table (gen-next tm-configuration) rows which-row))
-   (define (get-tape this)
-     (gen-get-tape (turing-machine-configunation+table-tm-configuration this)))
-   (define (get-position this)
-     (gen-get-position (turing-machine-configunation+table-tm-configuration this)))
-   (define (get-current-state-name this)
-     (gen-get-current-state-name (turing-machine-configunation+table-tm-configuration this)))])
+     (turing-machine-configunation+table (gen-next tm-configuration) rows which-row))])
 
 (define (table-rows tm-configuration+table)
   (turing-machine-configunation+table-rows tm-configuration+table))
