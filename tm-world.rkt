@@ -2,6 +2,7 @@
 
 (require 2htdp/image
          2htdp/universe
+         lang/posn
          racket/list
          racket/math
          racket/pretty
@@ -11,7 +12,11 @@
          "configuration/tm+table.rkt"
          "configuration/tm+table+history.rkt"
          "tape/tape-immutable.rkt"
+         "utils/posn.rkt"
+         "utils/image-posn.rkt"
          )
+
+(define draw-next-arrow? #t)
 
 (define SCENE-WIDTH  1200)
 (define SCENE-HEIGHT 735)
@@ -20,22 +25,25 @@
 
 (define EMPTY-SCENE (empty-scene SCENE-WIDTH SCENE-HEIGHT SCENE-BACKGROUND-COLOR))
 
-(define TAPE-X 20)
-(define TAPE-Y 20)
+(define TAPE-POSN (make-posn 20 20))
 
-(define TURING-MACHINE-TABLE-X 20)
-(define TURING-MACHINE-TABLE-Y 90)
+(define TURING-MACHINE-TABLE-POSN
+  (make-posn 20 90))
 
 (define TABLE-CELL-WIDTH  100)
 (define TABLE-CELL-HEIGHT 40)
+(define TABLE-CELL-CENTER
+  (make-posn (* 1/2 TABLE-CELL-WIDTH) (* 1/2 TABLE-CELL-HEIGHT)))
 
 (define TURING-MACHINE-TABLE-MAX-ROWS
   (exact-floor
-   (/ (- SCENE-HEIGHT TURING-MACHINE-TABLE-Y)
+   (/ (- SCENE-HEIGHT (posn-y TURING-MACHINE-TABLE-POSN))
       TABLE-CELL-HEIGHT)))
 
 (define TAPE-SQUARE-WIDTH  50)
 (define TAPE-SQUARE-HEIGHT 50)
+(define TAPE-SQUARE-CENTER
+  (make-posn (* 1/2 TAPE-SQUARE-WIDTH) (* 1/2 TAPE-SQUARE-HEIGHT)))
 
 (define TAPE-FONT-SIZE 20)
 (define TABLE-FONT-SIZE 16)
@@ -106,17 +114,17 @@
 
 ;; add-tape : World Image -> Image
 (define (add-tape w scene)
-  (place-image/align (render-tape w)
-                     TAPE-X TAPE-Y
-                     "left" "top"
-                     scene))
+  (place-image/align/posn (render-tape w)
+                          TAPE-POSN
+                          "left" "top"
+                          scene))
 
 ;; add-turing-machine-table : World Image -> Image
 (define (add-turing-machine-table w scene)
-  (place-image/align (render-turing-machine-table w)
-                     TURING-MACHINE-TABLE-X TURING-MACHINE-TABLE-Y
-                     "left" "top"
-                     scene))
+  (place-image/align/posn (render-turing-machine-table w)
+                          TURING-MACHINE-TABLE-POSN
+                          "left" "top"
+                          scene))
 
 ;; render-tape : World -> Image
 (define (render-tape w)
@@ -131,7 +139,11 @@
 (define (render-turing-machine-table w)
   (define rows (table-rows w))
   (define selected-row (which-table-row w w))
-  (render-turing-machine-table-sections rows selected-row))
+  (define table-img (render-turing-machine-table-sections rows selected-row))
+  (cond [draw-next-arrow?
+         (add-next-arrow w rows selected-row table-img)]
+        [else
+         table-img]))
 
 (define (render-turing-machine-table-sections rows selected-row)
   (cond
@@ -141,7 +153,8 @@
      (beside/align
       "top"
       (render-turing-machine-table-section (take rows TURING-MACHINE-TABLE-MAX-ROWS) selected-row)
-      (render-turing-machine-table-section (drop rows TURING-MACHINE-TABLE-MAX-ROWS) selected-row))]))
+      (render-turing-machine-table-sections (drop rows TURING-MACHINE-TABLE-MAX-ROWS) selected-row))]
+    ))
 
 (define (render-turing-machine-table-section rows selected-row)
   (frame
@@ -157,20 +170,20 @@
      (above img row-img))))
 
 (define (render-turing-machine-table-cell v selected?)
-  (place-image/align (text (tape-value->string v) TABLE-FONT-SIZE TABLE-FONT-COLOR)
-                     (* 1/2 TABLE-CELL-WIDTH) (* 1/2 TABLE-CELL-HEIGHT)
-                     "center" "center"
-                     (if selected?
-                         TABLE-CELL-SELECTED-IMAGE
-                         TABLE-CELL-BASE-IMAGE)))
+  (place-image/align/posn (text (tape-value->string v) TABLE-FONT-SIZE TABLE-FONT-COLOR)
+                          TABLE-CELL-CENTER
+                          "center" "center"
+                          (if selected?
+                              TABLE-CELL-SELECTED-IMAGE
+                              TABLE-CELL-BASE-IMAGE)))
 
 (define (render-tape-square v read-write-head?)
-  (place-image/align (text (tape-value->string v) TAPE-FONT-SIZE TAPE-FONT-COLOR)
-                     (* 1/2 TAPE-SQUARE-WIDTH) (* 1/2 TAPE-SQUARE-HEIGHT)
-                     "center" "center"
-                     (if read-write-head?
-                         TAPE-SQUARE-READ-WRITE-HEAD-IMAGE
-                         TAPE-SQUARE-BASE-IMAGE)))
+  (place-image/align/posn (text (tape-value->string v) TAPE-FONT-SIZE TAPE-FONT-COLOR)
+                          TAPE-SQUARE-CENTER
+                          "center" "center"
+                          (if read-write-head?
+                              TAPE-SQUARE-READ-WRITE-HEAD-IMAGE
+                              TAPE-SQUARE-BASE-IMAGE)))
 
 (define (tape-value->string v)
   (cond [(blank? v)
@@ -191,6 +204,42 @@
 ;; tick : World -> World
 (define (tick w)
   w)
+
+;; add-next-arrow :
+;; World (Listof (List Symbol Any Symbol Any)) (List Symbol Any Symbol Any) Image -> Image
+(define (add-next-arrow w rows selected-row table-img)
+  (define next-row (which-table-row w (next w)))
+  (define start
+    (posn+ (find-row-corner-posn selected-row rows)
+           (make-posn (* 5/2 TABLE-CELL-WIDTH)
+                      (* 1/2 TABLE-CELL-HEIGHT))))
+  (define end
+    (posn+ (find-row-corner-posn next-row rows)
+           (make-posn (* 1/2 TABLE-CELL-WIDTH)
+                      (* 1/2 TABLE-CELL-HEIGHT))))
+  (scene+line/posn table-img
+                   start
+                   end
+                   "blue"))
+
+;; find-row-corner-posn :
+;; (List Symbol Any Symbol Any) (Listof (List Symbol Any Symbol Any)) -> Posn
+(define (find-row-corner-posn row rows)
+  (define i (find-index row rows))
+  (define start-section-over
+    (quotient i TURING-MACHINE-TABLE-MAX-ROWS))
+  (define start-row-down
+    (remainder i TURING-MACHINE-TABLE-MAX-ROWS))
+  (make-posn
+   (* start-section-over (* 4 TABLE-CELL-WIDTH))
+   (* start-row-down TABLE-CELL-HEIGHT)))
+
+;; find-index : Any (Listof Any) -> (U Natural #f)
+(define (find-index v lst)
+  (for/first ([x (in-list lst)]
+              [i (in-naturals)]
+              #:when (equal? v x))
+    i))
 
 ;; finds the first b
 #;(main
