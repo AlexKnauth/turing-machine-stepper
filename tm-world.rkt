@@ -35,6 +35,18 @@
 (define TABLE-CELL-CENTER
   (make-posn (* 1/2 TABLE-CELL-WIDTH) (* 1/2 TABLE-CELL-HEIGHT)))
 
+(define TABLE-ROW-WIDTH
+  (* 4 TABLE-CELL-WIDTH))
+
+(define TABLE-ROW-FIRST-CELL-CENTER
+  (posn+ (make-posn (* 0 TABLE-CELL-WIDTH) 0) TABLE-CELL-CENTER))
+(define TABLE-ROW-SECOND-CELL-CENTER
+  (posn+ (make-posn (* 1 TABLE-CELL-WIDTH) 0) TABLE-CELL-CENTER))
+(define TABLE-ROW-THIRD-CELL-CENTER
+  (posn+ (make-posn (* 2 TABLE-CELL-WIDTH) 0) TABLE-CELL-CENTER))
+(define TABLE-ROW-FOURTH-CELL-CENTER
+  (posn+ (make-posn (* 3 TABLE-CELL-WIDTH) 0) TABLE-CELL-CENTER))
+
 (define TURING-MACHINE-TABLE-MAX-ROWS
   (exact-floor
    (/ (- SCENE-HEIGHT (posn-y TURING-MACHINE-TABLE-POSN))
@@ -211,12 +223,10 @@
   (define next-row (which-table-row w (next w)))
   (define start
     (posn+ (find-row-corner-posn selected-row rows)
-           (make-posn (* 5/2 TABLE-CELL-WIDTH)
-                      (* 1/2 TABLE-CELL-HEIGHT))))
+           TABLE-ROW-THIRD-CELL-CENTER))
   (define end
     (posn+ (find-row-corner-posn next-row rows)
-           (make-posn (* 1/2 TABLE-CELL-WIDTH)
-                      (* 1/2 TABLE-CELL-HEIGHT))))
+           TABLE-ROW-FIRST-CELL-CENTER))
   (scene+line/posn table-img
                    start
                    end
@@ -231,7 +241,7 @@
   (define start-row-down
     (remainder i TURING-MACHINE-TABLE-MAX-ROWS))
   (make-posn
-   (* start-section-over (* 4 TABLE-CELL-WIDTH))
+   (* start-section-over TABLE-ROW-WIDTH)
    (* start-row-down TABLE-CELL-HEIGHT)))
 
 ;; find-index : Any (Listof Any) -> (U Natural #f)
