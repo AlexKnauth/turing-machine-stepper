@@ -2,7 +2,6 @@
 
 (require 2htdp/image
          2htdp/universe
-         my-object
          racket/list
          racket/math
          racket/pretty
@@ -139,7 +138,8 @@
     [(<= (length rows) TURING-MACHINE-TABLE-MAX-ROWS)
      (render-turing-machine-table-section rows selected-row)]
     [else
-     (beside
+     (beside/align
+      "top"
       (render-turing-machine-table-section (take rows TURING-MACHINE-TABLE-MAX-ROWS) selected-row)
       (render-turing-machine-table-section (drop rows TURING-MACHINE-TABLE-MAX-ROWS) selected-row))]))
 

@@ -42,10 +42,9 @@
       (cons (gen-next (first configurations)) configurations)
       table))]
   #:methods gen:tm-table
-  [(define/generic gen-table-rows table-rows)
+  [(delegate tm-configuration+table+history-table
+             [table-rows])
    (define/generic gen-which-table-row which-table-row)
-   (define (table-rows table)
-     (gen-table-rows (tm-configuration+table+history-table table)))
    (define (which-table-row table tm-configuration)
      (define table* (tm-configuration+table+history-table table))
      (gen-which-table-row table* tm-configuration))])
