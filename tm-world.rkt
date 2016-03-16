@@ -227,10 +227,11 @@
   (define end
     (posn+ (find-row-corner-posn next-row rows)
            TABLE-ROW-FIRST-CELL-CENTER))
-  (scene+line/posn table-img
-                   start
-                   end
-                   "blue"))
+  (scene+arrow/posn table-img
+                    start
+                    end
+                    20
+                    "blue"))
 
 ;; find-row-corner-posn :
 ;; (List Symbol Any Symbol Any) (Listof (List Symbol Any Symbol Any)) -> Posn
