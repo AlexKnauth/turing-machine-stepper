@@ -182,20 +182,31 @@
      (above img row-img))))
 
 (define (render-turing-machine-table-cell v selected?)
-  (place-image/align/posn (text (tape-value->string v) TABLE-FONT-SIZE TABLE-FONT-COLOR)
+  (place-image/align/posn (table-cell-value->image v)
                           TABLE-CELL-CENTER
                           "center" "center"
                           (if selected?
                               TABLE-CELL-SELECTED-IMAGE
                               TABLE-CELL-BASE-IMAGE)))
 
+(define (table-cell-value->image v)
+  (cond [(equal? v '←)
+         (text (tape-value->string v) (* 2 TABLE-FONT-SIZE) TABLE-FONT-COLOR)]
+        [(equal? v '→)
+         (text (tape-value->string v) (* 2 TABLE-FONT-SIZE) TABLE-FONT-COLOR)]
+        [else
+         (text (tape-value->string v) TABLE-FONT-SIZE TABLE-FONT-COLOR)]))
+
 (define (render-tape-square v read-write-head?)
-  (place-image/align/posn (text (tape-value->string v) TAPE-FONT-SIZE TAPE-FONT-COLOR)
+  (place-image/align/posn (tape-value->image v)
                           TAPE-SQUARE-CENTER
                           "center" "center"
                           (if read-write-head?
                               TAPE-SQUARE-READ-WRITE-HEAD-IMAGE
                               TAPE-SQUARE-BASE-IMAGE)))
+
+(define (tape-value->image v)
+  (text (tape-value->string v) TAPE-FONT-SIZE TAPE-FONT-COLOR))
 
 (define (tape-value->string v)
   (cond [(blank? v)
